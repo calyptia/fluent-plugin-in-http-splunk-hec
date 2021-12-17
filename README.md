@@ -92,6 +92,31 @@ $ bundle
 |message_key|string (optional)|message key|`message`|
 |time_key|string (optional)|timestamp key|`time`|
 
+## Integrated configuration Example
+
+This plugin can handle Splunk HEC HTTP requests with the following configuration:
+
+```aconf
+<source>
+  @type http_splunk_hec
+  bind 0.0.0.0
+  port 8088
+  body_size_limit 32MB
+  keepalive_timeout 10
+  # backlog 0
+  add_http_headers false
+  splunk_token YOUR_SPLUNK_HTTP_HEC_TOKEN
+  <parse>
+    @type none
+  </parse>
+</source>
+
+<filter services.collector>
+  @type concatenated_splunk_json
+</filter>
+
+# And other data pipeline
+```
 
 ## Copyright
 
