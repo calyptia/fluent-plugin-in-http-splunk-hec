@@ -118,6 +118,70 @@ This plugin can handle Splunk HEC HTTP requests with the following configuration
 # And other data pipeline
 ```
 
+### Advanced Usage
+
+`in_http_splunk_hec` can be combined `fluent-plugin-cmetrics` to forward ingested Splunk metric records from mimicking Splunk HTTP HEC endpoint.
+
+When you want to use the below Splunk HTTP HEC aggregator, you have to install `fluent-plugin-cmetrics` before you use that.
+
+This plugin also can aggregate and the latter data pipeline can forward Splunk metric events with the following configuration:
+
+```aconf
+<source>
+  @type http_splunk_hec
+  bind 0.0.0.0
+  port 8089
+  body_size_limit 32MB
+  keepalive_timeout 10
+  # backlog 0
+  add_http_headers false
+  # Use the actual Splunk HTTP HEC endpoint token
+  splunk_token <<YOUR_SPLUNK_HEC_TOKEN>>
+  <parse>
+    @type none
+  </parse>
+</source>
+
+<filter services.collector>
+  @type concatenated_splunk_json
+</filter>
+
+<match services.collector>
+  @type copy
+  <store>
+    @type rdkafka2
+    brokers <<BROKER_URL:BROKER_PORT>>
+    topic services.collector
+    default_topic services.collector
+    use_event_time true
+    required_acks 1
+    <format>
+      # This plugin is included in `fluent-plugin-cmetrics`.
+      @type cmetrics_splunk_metric_payload
+      host_key host
+      cmetrics_name_key $.fields.metric_name
+      cmetrics_value_key $.fields._value
+      # Specifying the below parameter and `$.fields` in `<fields>` plugin custom directive,
+      # out_rdkafka2 can send Splunk metrics style records into Kafka.
+      #
+      # To remove the `$.fields` prefix from Splunk dimensions,
+      # This parameter should be true.
+      only_use_last_field_keys true
+      <fields>
+        $.fields
+      </fields>
+    </format>
+    <buffer>
+      @type memory
+      flush_interval 10s
+    </buffer>
+  </store>
+  <store>
+    @type stdout
+  </store>
+</match>
+```
+
 ## Copyright
 
 * Copyright(c) 2021- Calyptia Inc.
