@@ -37,8 +37,12 @@ module Fluent
       end
 
       def parse_splunk_timestamp(timestamp)
-        timestamp = Float(timestamp)
-        Fluent::EventTime.from_time(Time.at(timestamp.to_r))
+        if !timestamp.nil?
+          timestamp = Float(timestamp)
+          Fluent::EventTime.from_time(Time.at(timestamp.to_r))
+        else
+          Fluent::EventTime.now
+        end
       end
 
       def filter_stream(tag, es)
