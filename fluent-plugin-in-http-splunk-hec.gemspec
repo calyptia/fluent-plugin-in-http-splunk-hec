@@ -3,7 +3,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name    = "fluent-plugin-in-http-splunk-hec"
-  spec.version = "0.1.0.rc1"
+  spec.version = "0.1.0.rc2"
   spec.authors = ["Hiroshi Hatake"]
   spec.email   = ["cosmo0920.oucc@gmail.com"]
 
